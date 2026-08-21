@@ -122,49 +122,45 @@ def save_splits(
     print("\nSplit files saved to:")
     print(PROCESSED_DIR)
 
-def inspect_dataset() -> None:
+def inspect_samples(captions_df:pd.DataFrame,num_images:int=5) -> None:
+    
+    
+
+
+def main() -> None:
     """
-    Inspect the Flickr8k dataset and print basic statistics.
+    Run the complete Flickr8k dataset preparation process.
     """
+
     print("Loading Flickr8k captions...")
 
     captions_df = load_captions(CAPTIONS_FILE)
 
-    image_files = list(IMAGE_DIR.glob("*.jpg"))
-    image_names = {image.name for image in image_files}
-
-    caption_image_names = set(captions_df["image"])
-
-    caption_counts = Counter(captions_df["image"])
-
-    print("\n========== DATASET STATISTICS ==========")
-
-    print(f"Image files found: {len(image_files)}")
-    print(f"Unique images in captions.txt: {len(caption_image_names)}")
-    print(f"Total captions: {len(captions_df)}")
-
+    print(f"Total captions loaded: {len(captions_df)}")
     print(
-        f"Average captions per image: "
-        f"{len(captions_df) / len(caption_image_names):.2f}"
+        f"Unique images: "
+        f"{captions_df['image'].nunique()}"
     )
 
-    print(
-        f"Images with exactly 5 captions: "
-        f"{sum(count == 5 for count in caption_counts.values())}"
+    # Inspect a few examples before splitting.
+    inspect_samples(captions_df)
+
+    # Split by image.
+    train_df, val_df, test_df = split_images(captions_df)
+
+    # Verify there is no image leakage.
+    verify_split(
+        train_df,
+        val_df,
+        test_df,
     )
 
-    missing_images = caption_image_names - image_names
-
-    print(f"Caption entries with missing image files: {len(missing_images)}")
-
-    print("\nCaption distribution:")
-    print(Counter(caption_counts.values()))
-
-    print("\n========== SAMPLE CAPTIONS ==========")
-
-    print(captions_df.head(10).to_string(index=False))
-
-
+    # Save metadata.
+    save_splits(
+        train_df,
+        val_df,
+        test_df,
+    )
 if __name__ == "__main__":
-    inspect_dataset()
+    main()
     
