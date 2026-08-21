@@ -71,5 +71,7 @@ class Vocabulary:
             if word != self.pad_token and word != self.start_token:
                words.append(word)
         return " ".join(words)
+    def __len__(self) -> int:
+        return len(self.word_to_index)
         
                 
