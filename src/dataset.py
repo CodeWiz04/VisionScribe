@@ -14,11 +14,15 @@ RANDOM_SEED=42
 rows = []
 def load_captions(captions_file:Path)->pd.DataFrame:
     with captions_file.open("r",encoding="utf-8") as file:
-        for line in file:
+        for line_number, line in enumerate(file):
             line = line.strip()
 
             if not line:
-                continue
+              continue
+
+           # Skip the header row: image,caption
+            if line_number == 0 and line.lower() == "image,caption":
+               continue
 
             image_name, caption = line.split(",", maxsplit=1)  #will split at first comma
 
