@@ -47,3 +47,19 @@ class Vocabulary:
                 self.word_to_index[word] = index
                 self.index_to_word[index] = word
                 
+    def numericalize(self, caption: str) -> list[int]:
+        tokens = self.tokenize(caption)
+
+        # Add start and end tokens
+        tokens.insert(0, self.start_token)
+        tokens.append(self.end_token)
+
+        token_ids = []
+        for token in tokens:
+            if token in self.word_to_index:
+                token_ids.append(self.word_to_index[token])
+        else:
+            token_ids.append(self.word_to_index[self.unk_token])
+
+        return token_ids
+                
