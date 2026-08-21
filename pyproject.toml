@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "visionscribe"
+version = "0.1.0"
+description = "Image captioning system using CNN-based image features and an LSTM decoder"
+requires-python = ">=3.11,<3.12"
+
+dependencies = [
+    "torch",
+    "torchvision",
+    "numpy",
+    "pandas",
+    "pillow",
+    "nltk",
+    "matplotlib",
+    "scikit-learn",
+    "fastapi",
+    "uvicorn[standard]",
+    "python-multipart",
+    "pydantic",
+]
+
+[tool.setuptools]
+packages = ["src", "app"]

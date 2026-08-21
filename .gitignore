@@ -1,0 +1,98 @@
+# =========================
+# Python
+# =========================
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# =========================
+# Environment / Secrets
+# =========================
+
+.env
+.env.*
+!.env.example
+
+# =========================
+# Jupyter
+# =========================
+
+.ipynb_checkpoints/
+
+# =========================
+# Flickr8k Dataset
+# =========================
+
+data/raw/
+data/processed/
+
+# =========================
+# Generated outputs
+# =========================
+
+outputs/
+*.log
+
+# =========================
+# Trained model artifacts
+# =========================
+
+models/*.pt
+models/*.pth
+models/*.pth.tar
+models/*.ckpt
+models/*.bin
+models/*.safetensors
+
+# Model/cache files
+*.pkl
+*.pickle
+*.npy
+*.npz
+
+# =========================
+# IDE / Editor
+# =========================
+
+.vscode/
+.idea/
+
+# =========================
+# OS files
+# =========================
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================
+# Python packaging
+# =========================
+
+*.egg-info/
+dist/
+build/
+
+# =========================
+# Coverage / Testing
+# =========================
+
+.coverage
+htmlcov/
+.pytest_cache/
+
+# =========================
+# Temporary files
+# =========================
+
+*.tmp
+*.temp
+*.bak
