@@ -62,4 +62,14 @@ class Vocabulary:
             token_ids.append(self.word_to_index[self.unk_token])
 
         return token_ids
+    def decode(self, token_ids: list[int]) -> str:
+        words = []
+        for token_id in token_ids:
+            word = self.index_to_word.get(token_id, self.unk_token)
+            if word == self.end_token:
+              break
+            if word != self.pad_token and word != self.start_token:
+               words.append(word)
+        return " ".join(words)
+        
                 
