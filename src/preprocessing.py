@@ -1,5 +1,6 @@
 from collections import Counter
 from pathlib import Path
+import string
 import re
 
 import pandas as pd
@@ -24,4 +25,12 @@ class Vocabulary:
             2: self.end_token,
             3: self.unk_token,
         }
+        
+    def tokenize(self, caption: str) -> list[str]:
+       caption = caption.lower()
+
+       for symbol in string.punctuation:
+         caption = caption.replace(symbol, "")
+
+       return caption.split()
         
