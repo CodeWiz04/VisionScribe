@@ -59,7 +59,44 @@ def split_images(
 
     return train_df, val_df, test_df
     
-    
+def verify_split(
+    train_df: pd.DataFrame,
+    val_df: pd.DataFrame,
+    test_df: pd.DataFrame,
+) -> None:
+    train_images = set(train_df["image"])
+    val_images = set(val_df["image"])
+    test_images = set(test_df["image"])
+    print("\n========== SPLIT VERIFICATION ==========")
+
+    print(f"Training images:   {len(train_images)}")
+    print(f"Validation images: {len(val_images)}")
+    print(f"Test images:       {len(test_images)}")
+
+    print(f"\nTraining captions:   {len(train_df)}")
+    print(f"Validation captions: {len(val_df)}")
+    print(f"Test captions:       {len(test_df)}")
+    print("\nImage overlap:")
+
+    print(
+        f"Train ∩ Validation: "
+        f"{len(train_images & val_images)}"
+    )
+
+    print(
+        f"Train ∩ Test: "
+        f"{len(train_images & test_images)}"
+    )
+
+    print(
+        f"Validation ∩ Test: "
+        f"{len(val_images & test_images)}"
+    )
+    assert not train_images.intersection(val_images)
+    assert not train_images.intersection(test_images)
+    assert not val_images.intersection(test_images)
+
+    print("\n✓ No image appears in more than one split.")
 
 def inspect_dataset() -> None:
     """
