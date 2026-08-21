@@ -98,6 +98,30 @@ def verify_split(
 
     print("\n✓ No image appears in more than one split.")
 
+def save_splits(
+    train_df: pd.DataFrame,
+    val_df: pd.DataFrame,
+    test_df: pd.DataFrame,
+) -> None:
+    PROCESSED_DIR.mkdir(parents=True,exist_ok=True)
+    train_df.to_csv(
+        PROCESSED_DIR / "train_captions.csv",
+        index=False,
+    )
+
+    val_df.to_csv(
+        PROCESSED_DIR / "val_captions.csv",
+        index=False,
+    )
+
+    test_df.to_csv(
+        PROCESSED_DIR / "test_captions.csv",
+        index=False,
+    )
+
+    print("\nSplit files saved to:")
+    print(PROCESSED_DIR)
+
 def inspect_dataset() -> None:
     """
     Inspect the Flickr8k dataset and print basic statistics.
