@@ -2,11 +2,15 @@ from pathlib import Path
 from collections import Counter
 
 import pandas as pd
+from sklearn.model_selection import train_test_split
+import pandas as pd
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_ROOT / "data" / "raw"
+PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
 
 IMAGE_DIR = DATA_DIR / "Images"
 CAPTIONS_FILE = DATA_DIR / "captions.txt"
+RANDOM_SEED=42
 rows = []
 def load_captions(captions_file:Path)->pd.DataFrame:
     with captions_file.open("r",encoding="utf-8") as file:
@@ -26,6 +30,19 @@ def load_captions(captions_file:Path)->pd.DataFrame:
             )
 
     return pd.DataFrame(rows)
+
+def split_images(
+    captions_df:pd.DataFrame,
+    random_seed:int=RANDOM_SEED,
+)->tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    unique_images = captions_df["image"].unique()
+    train_images, temp_images = train_test_split(
+        unique_images,
+        test_size=0.20,
+        random_state=random_seed,
+    )
+    
+    
 
 def inspect_dataset() -> None:
     """
