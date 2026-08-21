@@ -123,6 +123,19 @@ def save_splits(
     print(PROCESSED_DIR)
 
 def inspect_samples(captions_df:pd.DataFrame,num_images:int=5) -> None:
+    sample_images = captions_df["image"].drop_duplicates().sample(
+        n=num_images,
+        random_state=RANDOM_SEED,
+    )
+    for image_name in sample_images:
+        print(f"\nImage: {image_name}")
+
+        image_captions = captions_df[
+            captions_df["image"] == image_name
+        ]["caption"]
+
+        for index, caption in enumerate(image_captions, start=1):
+            print(f"  {index}. {caption}")
     
     
 
