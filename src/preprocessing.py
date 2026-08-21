@@ -33,4 +33,17 @@ class Vocabulary:
          caption = caption.replace(symbol, "")
 
        return caption.split()
-        
+    def build(self, captions: list[str]) -> None:
+        word_counts = Counter()
+        for caption in captions:
+           words = self.tokenize(caption)
+           word_counts.update(words)
+        counter = Counter()
+
+        for word, frequency in counter.items():
+
+            if frequency >= self.min_frequency:
+                index = len(self.word_to_index)
+                self.word_to_index[word] = index
+                self.index_to_word[index] = word
+                
