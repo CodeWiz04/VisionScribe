@@ -41,6 +41,23 @@ def split_images(
         test_size=0.20,
         random_state=random_seed,
     )
+    val_images,test_images=train_test_split(
+        temp_images,
+        test_size=0.5,
+        random_state=random_seed
+    )
+    train_df=captions_df[
+        captions_df["image"].isin(train_images)
+    ].copy()
+    val_df = captions_df[
+        captions_df["image"].isin(val_images)
+    ].copy()
+
+    test_df = captions_df[
+        captions_df["image"].isin(test_images)
+    ].copy()
+
+    return train_df, val_df, test_df
     
     
 
