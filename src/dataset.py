@@ -26,4 +26,50 @@ def load_captions(captions_file:Path)->pd.DataFrame:
             )
 
     return pd.DataFrame(rows)
+
+def inspect_dataset() -> None:
+    """
+    Inspect the Flickr8k dataset and print basic statistics.
+    """
+    print("Loading Flickr8k captions...")
+
+    captions_df = load_captions(CAPTIONS_FILE)
+
+    image_files = list(IMAGE_DIR.glob("*.jpg"))
+    image_names = {image.name for image in image_files}
+
+    caption_image_names = set(captions_df["image"])
+
+    caption_counts = Counter(captions_df["image"])
+
+    print("\n========== DATASET STATISTICS ==========")
+
+    print(f"Image files found: {len(image_files)}")
+    print(f"Unique images in captions.txt: {len(caption_image_names)}")
+    print(f"Total captions: {len(captions_df)}")
+
+    print(
+        f"Average captions per image: "
+        f"{len(captions_df) / len(caption_image_names):.2f}"
+    )
+
+    print(
+        f"Images with exactly 5 captions: "
+        f"{sum(count == 5 for count in caption_counts.values())}"
+    )
+
+    missing_images = caption_image_names - image_names
+
+    print(f"Caption entries with missing image files: {len(missing_images)}")
+
+    print("\nCaption distribution:")
+    print(Counter(caption_counts.values()))
+
+    print("\n========== SAMPLE CAPTIONS ==========")
+
+    print(captions_df.head(10).to_string(index=False))
+
+
+if __name__ == "__main__":
+    inspect_dataset()
     
