@@ -135,6 +135,25 @@ def get_max_caption_length(
 
     return max(lengths)
 
+def preprocess_captions(
+    captions: list[str],
+    vocabulary: Vocabulary,
+    max_length: int,
+) -> list[list[int]]:
+    processed_captions = []
+
+    for caption in captions:
+
+        token_ids = vocabulary.numericalize(
+            caption
+        )
+        token_ids = vocabulary.pad_sequence(
+            token_ids,
+            max_length,
+        )
+        processed_captions.append(token_ids)
+    return processed_captions
+
 if __name__ == "__main__":
 
     PROJECT_ROOT = Path(__file__).resolve().parent.parent
