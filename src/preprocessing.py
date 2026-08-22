@@ -30,45 +30,14 @@ class Vocabulary:
         }
 
     def tokenize(self, caption: str) -> list[str]:
-        """
-        Clean and tokenize a caption.
-
-        The caption is converted to lowercase, punctuation is
-        removed, and the remaining text is split into words.
-
-        Parameters
-        ----------
-        caption : str
-            Raw caption text.
-
-        Returns
-        -------
-        list[str]
-            List of tokens.
-        """
-
         caption = caption.lower()
 
         # Remove punctuation.
         for symbol in string.punctuation:
             caption = caption.replace(symbol, "")
-
-        # Split into individual words.
         return caption.split()
 
     def build(self, captions: list[str]) -> None:
-        """
-        Build the vocabulary using training captions.
-
-        Only words appearing at least min_frequency times
-        are added to the vocabulary.
-
-        Parameters
-        ----------
-        captions : list[str]
-            Training captions only.
-        """
-
         word_counts = Counter()
 
         # Count every word in the training captions.
@@ -88,8 +57,6 @@ class Vocabulary:
 
     def numericalize(self, caption: str) -> list[int]:
         tokens = self.tokenize(caption)
-
-        # Add special tokens.
         tokens.insert(0, self.start_token)
         tokens.append(self.end_token)
 
@@ -130,3 +97,27 @@ class Vocabulary:
 
     def __len__(self) -> int:
         return len(self.word_to_index)
+    
+    def pad_sequence(
+        self,
+        token_ids:list[int],
+        max_length:int,
+    )->list[int]:
+        pad_id = self.word_to_index[self.pad_token]
+        # If the caption is shorter than max_length,
+        # add <pad> tokens at the end.
+        if len(token_ids) < max_length:
+            padding_length = max_length - len(token_ids)
+            for _ in range(padding_length):
+                token_ids.append(pad_id)
+                
+        # If the caption is longer than max_length,
+        # truncate it.
+        else:
+            token_ids = token_ids[:max_length]
+            
+            #Place end token at the end
+            token_ids[-1] = self.word_to_index[
+            self.end_token
+        ]
+        return token_ids
