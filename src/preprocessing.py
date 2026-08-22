@@ -1,6 +1,7 @@
 from collections import Counter
 import string
-
+from pathlib import Path
+import pandas as pd
 
 class Vocabulary:
     def __init__(self, min_frequency: int = 2):
@@ -121,3 +122,71 @@ class Vocabulary:
             self.end_token
         ]
         return token_ids
+    
+def get_max_caption_length(
+    captions: list[str],
+    vocabulary: Vocabulary,
+) -> int:
+    lengths = []
+
+    for caption in captions:
+        token_ids = vocabulary.numericalize(caption)
+        lengths.append(len(token_ids))
+
+    return max(lengths)
+
+if __name__ == "__main__":
+
+    PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+    train_file = (
+        PROJECT_ROOT
+        / "data"
+        / "processed"
+        / "train_captions.csv"
+    )
+
+    train_df = pd.read_csv(train_file)
+
+    captions = train_df["caption"].tolist()
+
+    print(f"Training captions: {len(captions)}")
+
+    # Build vocabulary ONLY from training captions.
+    vocabulary = Vocabulary(min_frequency=2)
+
+    vocabulary.build(captions)
+
+    print(f"Vocabulary size: {len(vocabulary)}")
+
+    max_length = get_max_caption_length(
+        captions,
+        vocabulary,
+    )
+
+    print(f"Maximum caption length: {max_length}")
+
+    # Calculate some useful statistics.
+    lengths = [
+        len(vocabulary.numericalize(caption))
+        for caption in captions
+    ]
+
+    print(
+        f"Minimum caption length: {min(lengths)}"
+    )
+
+    print(
+        f"Average caption length: "
+        f"{sum(lengths) / len(lengths):.2f}"
+    )
+
+    print(
+        f"95th percentile: "
+        f"{pd.Series(lengths).quantile(0.95):.0f}"
+    )
+
+    print(
+        f"99th percentile: "
+        f"{pd.Series(lengths).quantile(0.99):.0f}"
+    )
