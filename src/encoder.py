@@ -65,6 +65,49 @@ class CNNEncoder:
         features = features.squeeze(0)
 
         return features.cpu()
+    
+def cache_features(
+    encoder,
+    image_dir,
+    output_dir
+):
+    output_dir.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    image_paths = sorted(
+        image_dir.glob("*.jpg")
+    )
+
+    print(f"Found {len(image_paths)} images.")
+
+    for index, image_path in enumerate(
+        image_paths,
+        start=1,
+    ):
+        output_path = (
+            output_dir
+            / f"{image_path.stem}.pt"
+        )
+
+        # Don't recompute features that already exist.
+        if output_path.exists():
+            continue
+
+        features = encoder.extract(
+            image_path
+        )
+
+        torch.save(
+            features,
+            output_path
+        )
+
+        if index % 100 == 0:
+            print(
+                f"Processed {index}/{len(image_paths)}"
+            )
 if __name__ == "__main__":
 
     PROJECT_ROOT = Path(__file__).resolve().parent.parent
