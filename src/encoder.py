@@ -37,5 +37,67 @@ class CNNEncoder:
         # pretrained ResNet-50 weights.
         self.transform = weights.transforms()       #resize,crop,convert to tensor,normalize,resnet50    
         
-        
-        
+    def extract(self, image_path: Path) -> torch.Tensor:
+        try:
+            image = Image.open(image_path).convert("RGB")
+        except (OSError, ValueError) as error:
+            raise ValueError(
+                f"Could not load image: {image_path}"
+            ) from error
+        image_tensor = self.transform(image)
+        # Add batch dimension.
+        #
+        # Before:
+        # [3, 224, 224]
+        #
+        # After:
+        # [1, 3, 224, 224]
+        image_tensor = image_tensor.unsqueeze(0)
+        image_tensor = image_tensor.to(self.device)
+        # We are not training the CNN, so gradients
+        # are unnecessary.
+        with torch.no_grad():
+
+            features = self.model(image_tensor)
+        # Remove the batch dimension.
+        #
+        # [1, 2048] → [2048]
+        features = features.squeeze(0)
+
+        return features.cpu()
+if __name__ == "__main__":
+
+    PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+    IMAGE_DIR = (
+        PROJECT_ROOT
+        / "data"
+        / "raw"
+        / "Images"
+    )
+
+    # Use one known Flickr8k image.
+    image_path = (
+        IMAGE_DIR
+        / "1000268201_693b08cb0e.jpg"
+    )
+
+    # Use GPU if available, otherwise CPU.
+    device = torch.device(
+        "cuda"
+        if torch.cuda.is_available()
+        else "cpu"
+    )
+
+    print(f"Using device: {device}")
+
+    encoder = CNNEncoder(
+        device=device
+    )
+
+    features = encoder.extract(
+        image_path
+    )
+
+    print(f"Feature shape: {features.shape}")
+    print(f"Feature dtype: {features.dtype}")
