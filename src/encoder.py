@@ -90,8 +90,6 @@ def cache_features(
             output_dir
             / f"{image_path.stem}.pt"
         )
-
-        # Don't recompute features that already exist.
         if output_path.exists():
             continue
 
