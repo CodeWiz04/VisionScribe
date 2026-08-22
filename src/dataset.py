@@ -1,9 +1,10 @@
 from pathlib import Path
-from collections import Counter
-
-import pandas as pd
 from sklearn.model_selection import train_test_split
 import pandas as pd
+import torch
+from torch.utils.data import Dataset
+
+from preprocessing import Vocabulary
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_ROOT / "data" / "raw"
 PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
@@ -12,6 +13,7 @@ IMAGE_DIR = DATA_DIR / "Images"
 CAPTIONS_FILE = DATA_DIR / "captions.txt"
 RANDOM_SEED=42
 rows = []
+
 def load_captions(captions_file:Path)->pd.DataFrame:
     with captions_file.open("r",encoding="utf-8") as file:
         for line_number, line in enumerate(file):
@@ -141,7 +143,38 @@ def inspect_samples(captions_df:pd.DataFrame,num_images:int=5) -> None:
         for index, caption in enumerate(image_captions, start=1):
             print(f"  {index}. {caption}")
     
-    
+class CaptionDataset(Dataset):
+    """
+    PyTorch Dataset for image-caption pairs.
+
+    This dataset converts captions into padded integer
+    sequences while keeping track of the corresponding
+    image filename.
+    """
+    def __init__(
+        self,
+        captions_file: Path,
+        vocabulary: Vocabulary,
+        max_length: int,
+    ):
+        self.data = pd.read_csv(captions_file)
+
+        self.vocabulary = vocabulary
+
+        self.max_length = max_length
+    def __len__(self) -> int:
+        """
+        Return the number of image-caption pairs.
+        """
+
+        return len(self.data)
+    def __getitem__(self, index: int) -> dict:
+        """Get one image and its caption."""
+        row=self.data.iloc[index]
+        image_name=row["image"]
+        caption=row=["caption"]
+        
+        
 
 
 def main() -> None:
