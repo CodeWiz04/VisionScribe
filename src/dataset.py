@@ -170,9 +170,23 @@ class CaptionDataset(Dataset):
         return len(self.data)
     def __getitem__(self, index: int) -> dict:
         """Get one image and its caption."""
+        # Get the row at the given index
         row=self.data.iloc[index]
+        
         image_name=row["image"]
-        caption=row=["caption"]
+        caption=row["caption"]
+        # Convert caption into numbers
+        token_ids = self.vocabulary.numericalize(caption)
+        # Make the caption the required length
+        token_ids = self.vocabulary.pad_sequence(
+        token_ids,
+        self.max_length
+        )
+        caption = torch.tensor(token_ids, dtype=torch.long)
+        return {
+        "image_name": image_name,
+        "caption": caption
+    }
         
         
 
@@ -212,5 +226,57 @@ def main() -> None:
         test_df,
     )
 if __name__ == "__main__":
+
+    # Existing dataset preparation.
     main()
+
+    print("\n========== TESTING CAPTION DATASET ==========")
+
+    train_file = PROCESSED_DIR / "train_captions.csv"
+
+    # Load training captions.
+    train_df = pd.read_csv(train_file)
+
+    # Build vocabulary ONLY from training captions.
+    vocabulary = Vocabulary(min_frequency=2)
+    vocabulary.build(
+        train_df["caption"].tolist()
+    )
+
+    # Determine maximum caption length.
+    max_length = max(
+        len(vocabulary.numericalize(caption))
+        for caption in train_df["caption"]
+    )
+
+    print(f"Vocabulary size: {len(vocabulary)}")
+    print(f"Maximum caption length: {max_length}")
+
+    # Create PyTorch Dataset.
+    dataset = CaptionDataset(
+        captions_file=train_file,
+        vocabulary=vocabulary,
+        max_length=max_length,
+    )
+
+    print(f"Dataset size: {len(dataset)}")
+
+    # Get first sample.
+    sample = dataset[0]
+
+    print("\nImage name:")
+    print(sample["image_name"])
+
+    print("\nCaption tensor:")
+    print(sample["caption"])
+
+    print("\nTensor shape:")
+    print(sample["caption"].shape)
+
+    print("\nDecoded caption:")
+    print(
+        vocabulary.decode(
+            sample["caption"].tolist()
+        )
+    )
     
