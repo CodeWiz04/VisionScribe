@@ -132,7 +132,8 @@ curl -X POST "http://127.0.0.1:8000/caption" \
 
 ### Pull from registry
 ```bash
-docker pull ghcr.io/codewiz04/image-captioning-api:latest```
+docker pull ghcr.io/codewiz04/image-captioning-api:latest
+```
 
 ---
 
