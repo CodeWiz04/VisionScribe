@@ -5,7 +5,6 @@ photos. A frozen ResNet-50 CNN extracts image features, which are fed into
 an LSTM decoder that generates captions word by word (trained with teacher
 forcing). Served via FastAPI and packaged in Docker.
 
-Built for NextBridge Summer Internship 2026 — AI/ML Track, Task 4.
 
 ---
 
