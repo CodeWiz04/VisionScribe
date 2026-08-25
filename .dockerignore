@@ -1,0 +1,29 @@
+# Raw dataset and training artifacts — not needed for serving
+data/
+features/
+notebooks/
+outputs/
+*.ipynb
+
+# Only decoder_best.pt / vocabulary.json / config.json under models/ are
+# needed; if you keep other checkpoints there, ignore them explicitly too.
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Version control / editor / OS junk
+.git/
+.gitignore
+.vscode/
+.idea/
+.DS_Store
+
+# Misc
+*.log
+.pytest_cache/
+README.md
