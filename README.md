@@ -5,7 +5,6 @@ photos. A frozen ResNet-50 CNN extracts image features, which are fed into
 an LSTM decoder that generates captions word by word (trained with teacher
 forcing). Served via FastAPI and packaged in Docker.
 
-
 ---
 
 ## 1. Project Structure
@@ -109,6 +108,12 @@ curl -X POST "http://127.0.0.1:8000/caption" \
   -F "file=@test_images/sample.jpg"
 ```
 
+**Example response:**
+```json
+{
+  "caption": "<PASTE AN ACTUAL GENERATED CAPTION HERE>"
+}
+```
 
 ---
 
@@ -132,7 +137,7 @@ curl -X POST "http://127.0.0.1:8000/caption" \
 
 ### Pull from registry
 ```bash
-docker pull ghcr.io/codewiz04/image-captioning-api:latest
+docker pull <your-username>/image-captioning-api
 ```
 
 ---
@@ -149,6 +154,7 @@ docker pull ghcr.io/codewiz04/image-captioning-api:latest
 | Vocabulary | Built from training captions only, min frequency = 2 |
 | Loss | Cross-entropy, padding tokens masked out |
 | Decoding (inference) | Greedy (argmax at each step) |
+
 
 ---
 
@@ -168,6 +174,16 @@ BLEU-1 relative to BLEU-4 is expected: single-word overlap with references
 is common, but matching longer 3–4 word sequences exactly is harder and
 drops off more sharply — a normal pattern for a single-layer LSTM decoder
 without attention.
+
+**Test set:** 810 images (evaluated on cached ResNet-50 features, greedy decoding).
+
+**Sample captions:**
+
+| Image | Generated Caption | Reference Caption |
+|---|---|---|
+| `1028205764_7e8df9a2ea.jpg` | a man in a yellow kayak is paddling a boat | A man and young boy ride in a yellow kayak. |
+| `1079274291_9aaf896cc1.jpg` | two young boys are smiling and one of a blue and white shirt | Two young boys are looking at the camera, one smiling, the other sticking his tongue out. |
+| `102351840_323e3de834.jpg` | a man is standing on a dock overlooking a lake | A man is drilling through the frozen ice of a pond. |
 
 
 
