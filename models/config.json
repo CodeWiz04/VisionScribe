@@ -1,0 +1,11 @@
+{
+  "feature_dim": 2048,
+  "embedding_dim": 256,
+  "hidden_dim": 512,
+  "num_layers": 1,
+  "vocab_size": 4721,
+  "max_length": 38,
+  "pad_token_id": 0,
+  "start_token_id": 1,
+  "end_token_id": 2
+}

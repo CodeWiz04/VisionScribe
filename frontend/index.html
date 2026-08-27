@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>VisionScribe — Image Captioning</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #ffffff;
+            color: #222222;
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            padding: 30px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+        }
+
+        /* Header */
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #666666;
+            font-size: 15px;
+        }
+
+        /* Main card */
+
+        .card {
+            border: 1px solid #dddddd;
+            border-radius: 12px;
+            padding: 25px;
+            background: #ffffff;
+        }
+
+        /* Upload area */
+
+        .dropzone {
+            border: 2px dashed #cccccc;
+            border-radius: 10px;
+
+            padding: 55px 20px;
+            text-align: center;
+
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .dropzone:hover,
+        .dropzone.dragover {
+            border-color: #222222;
+            background: #fafafa;
+        }
+
+        .upload-icon {
+            font-size: 38px;
+            margin-bottom: 15px;
+        }
+
+        .dropzone h3 {
+            font-size: 17px;
+            margin-bottom: 8px;
+        }
+
+        .dropzone p {
+            color: #777777;
+            font-size: 13px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Preview */
+
+        .preview-area {
+            display: none;
+        }
+
+        .preview-area.active {
+            display: block;
+        }
+
+        .image-container {
+            border: 1px solid #dddddd;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f7f7f7;
+        }
+
+        .image-container img {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* File information */
+
+        .file-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-top: 12px;
+            font-size: 13px;
+            color: #666666;
+        }
+
+        .change-btn {
+            border: none;
+            background: none;
+            color: #222222;
+
+            cursor: pointer;
+            text-decoration: underline;
+
+            font-size: 13px;
+        }
+
+        .change-btn:hover {
+            color: #666666;
+        }
+
+        /* Generate button */
+
+        .generate-btn {
+            width: 100%;
+            margin-top: 20px;
+
+            padding: 12px;
+
+            border: none;
+            border-radius: 7px;
+
+            background: #222222;
+            color: white;
+
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .generate-btn:hover {
+            background: #444444;
+        }
+
+        .generate-btn:disabled {
+            background: #999999;
+            cursor: not-allowed;
+        }
+
+        /* Result */
+
+        .result {
+            margin-top: 20px;
+
+            border: 1px solid #dddddd;
+            border-radius: 10px;
+
+            padding: 20px;
+
+            background: #fafafa;
+        }
+
+        .result-title {
+            font-size: 12px;
+            font-weight: bold;
+
+            color: #777777;
+            text-transform: uppercase;
+
+            margin-bottom: 10px;
+        }
+
+        .result-text {
+            font-size: 19px;
+            line-height: 1.5;
+        }
+
+        .loading {
+            color: #777777;
+            font-size: 14px;
+        }
+
+        .error {
+            color: #c0392b;
+            font-size: 14px;
+        }
+
+        /* Footer */
+
+        .footer {
+            text-align: center;
+
+            margin-top: 20px;
+
+            font-size: 12px;
+            color: #999999;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 30px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .dropzone {
+                padding: 40px 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- Header -->
+
+    <div class="header">
+        <h1>VisionScribe</h1>
+
+        <p>
+            AI-powered image captioning using CNN + LSTM
+        </p>
+    </div>
+
+
+    <!-- Main Card -->
+
+    <div class="card">
+
+        <!-- Upload Area -->
+
+        <div class="dropzone" id="dropzone">
+
+            <div class="upload-icon">↑</div>
+
+            <h3>
+                Upload an image
+            </h3>
+
+            <p>
+                Drag & drop or click to browse
+            </p>
+
+            <p style="margin-top: 5px;">
+                JPG, PNG, WEBP
+            </p>
+
+            <input
+                type="file"
+                id="fileInput"
+                accept="image/jpeg,image/png,image/webp"
+            >
+
+        </div>
+
+
+        <!-- Preview Area -->
+
+        <div class="preview-area" id="previewArea">
+
+            <div class="image-container">
+
+                <img
+                    id="previewImg"
+                    src=""
+                    alt="Selected image"
+                >
+
+            </div>
+
+
+            <!-- File information -->
+
+            <div class="file-info">
+
+                <span id="fileMeta">
+                    —
+                </span>
+
+                <button
+                    class="change-btn"
+                    id="changeBtn"
+                    type="button"
+                >
+                    Choose another
+                </button>
+
+            </div>
+
+
+            <!-- Generate Button -->
+
+            <button
+                class="generate-btn"
+                id="generateBtn"
+                type="button"
+            >
+                Generate Caption
+            </button>
+
+
+            <!-- Result -->
+
+            <div
+                class="result"
+                id="resultBox"
+                style="display: none;"
+            >
+
+                <div class="result-title">
+                    Generated Caption
+                </div>
+
+                <div
+                    class="result-text"
+                    id="resultText"
+                >
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Footer -->
+
+    <div class="footer">
+
+        API:
+        <span id="endpointLabel">
+            http://127.0.0.1:8000
+        </span>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    /*
+     * FastAPI backend
+     *
+     * Your backend should be running at:
+     *
+     * http://127.0.0.1:8000
+     */
+
+    const API_BASE = "http://127.0.0.1:8000";
+
+
+    // Get HTML elements
+
+    const dropzone =
+        document.getElementById("dropzone");
+
+    const fileInput =
+        document.getElementById("fileInput");
+
+    const previewArea =
+        document.getElementById("previewArea");
+
+    const previewImg =
+        document.getElementById("previewImg");
+
+    const fileMeta =
+        document.getElementById("fileMeta");
+
+    const changeBtn =
+        document.getElementById("changeBtn");
+
+    const generateBtn =
+        document.getElementById("generateBtn");
+
+    const resultBox =
+        document.getElementById("resultBox");
+
+    const resultText =
+        document.getElementById("resultText");
+
+    const endpointLabel =
+        document.getElementById("endpointLabel");
+
+
+    endpointLabel.textContent = API_BASE;
+
+
+    // Store selected file
+
+    let selectedFile = null;
+
+
+    /*
+     * Clicking the upload area
+     * opens the file browser.
+     */
+
+    dropzone.addEventListener("click", function () {
+
+        fileInput.click();
+
+    });
+
+
+    /*
+     * Dragging an image over the upload area
+     */
+
+    dropzone.addEventListener("dragover", function (event) {
+
+        event.preventDefault();
+
+        dropzone.classList.add("dragover");
+
+    });
+
+
+    /*
+     * Image leaves upload area
+     */
+
+    dropzone.addEventListener("dragleave", function () {
+
+        dropzone.classList.remove("dragover");
+
+    });
+
+
+    /*
+     * Image is dropped
+     */
+
+    dropzone.addEventListener("drop", function (event) {
+
+        event.preventDefault();
+
+        dropzone.classList.remove("dragover");
+
+
+        const files = event.dataTransfer.files;
+
+
+        if (files.length > 0) {
+
+            handleFile(files[0]);
+
+        }
+
+    });
+
+
+    /*
+     * Image selected through file browser
+     */
+
+    fileInput.addEventListener("change", function (event) {
+
+        if (event.target.files.length > 0) {
+
+            handleFile(event.target.files[0]);
+
+        }
+
+    });
+
+
+    /*
+     * Handle selected image
+     */
+
+    function handleFile(file) {
+
+        // Make sure it is an image
+
+        if (!file.type.startsWith("image/")) {
+
+            alert("Please select an image.");
+
+            return;
+
+        }
+
+
+        selectedFile = file;
+
+
+        // Display image preview
+
+        const reader = new FileReader();
+
+
+        reader.onload = function (event) {
+
+            previewImg.src = event.target.result;
+
+        };
+
+
+        reader.readAsDataURL(file);
+
+
+        // Hide upload area
+
+        dropzone.style.display = "none";
+
+
+        // Show preview
+
+        previewArea.classList.add("active");
+
+
+        // Show file information
+
+        const sizeKB =
+            (file.size / 1024).toFixed(0);
+
+        fileMeta.textContent =
+            `${file.name} · ${sizeKB} KB`;
+
+
+        // Reset previous result
+
+        resultBox.style.display = "none";
+
+        resultText.textContent = "";
+
+    }
+
+
+    /*
+     * Choose another image
+     */
+
+    changeBtn.addEventListener("click", function () {
+
+        fileInput.value = "";
+
+        selectedFile = null;
+
+        previewImg.src = "";
+
+        previewArea.classList.remove("active");
+
+        dropzone.style.display = "block";
+
+        resultBox.style.display = "none";
+
+    });
+
+
+    /*
+     * Generate caption
+     */
+
+    generateBtn.addEventListener("click", function () {
+
+        if (!selectedFile) {
+
+            alert("Please select an image first.");
+
+            return;
+
+        }
+
+
+        requestCaption(selectedFile);
+
+    });
+
+
+    /*
+     * Send image to FastAPI
+     */
+
+    async function requestCaption(file) {
+
+        // Show loading state
+
+        resultBox.style.display = "block";
+
+        resultText.className = "result-text loading";
+
+        resultText.textContent =
+            "Generating caption...";
+
+        generateBtn.disabled = true;
+
+        generateBtn.textContent =
+            "Generating...";
+
+
+        /*
+         * FormData is used because
+         * the API expects a file upload.
+         */
+
+        const formData = new FormData();
+
+        formData.append("file", file);
+
+
+        try {
+
+            /*
+             * Send POST request:
+             *
+             * http://127.0.0.1:8000/caption
+             */
+
+            const response = await fetch(
+                `${API_BASE}/caption`,
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
+
+
+            /*
+             * Check whether API returned
+             * an error.
+             */
+
+            if (!response.ok) {
+
+                const errorData =
+                    await response
+                        .json()
+                        .catch(() => ({}));
+
+
+                throw new Error(
+                    errorData.detail ||
+                    `Request failed (${response.status})`
+                );
+
+            }
+
+
+            /*
+             * Convert API response to JSON.
+             */
+
+            const data =
+                await response.json();
+
+
+            /*
+             * Expected response:
+             *
+             * {
+             *     "caption": "A dog is running."
+             * }
+             */
+
+            resultText.className =
+                "result-text";
+
+            resultText.textContent =
+                data.caption;
+
+
+        } catch (error) {
+
+            /*
+             * Something went wrong.
+             */
+
+            resultText.className =
+                "result-text error";
+
+            resultText.textContent =
+                `Error: ${error.message}`;
+
+
+        } finally {
+
+            // Enable button again
+
+            generateBtn.disabled = false;
+
+            generateBtn.textContent =
+                "Generate Caption";
+
+        }
+
+    }
+
+</script>
+
+</body>
+</html>

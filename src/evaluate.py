@@ -30,12 +30,24 @@ TEST_FILE = PROCESSED_DIR / "test_captions.csv"
 
 
 def load_vocabulary(vocab_path: Path) -> Vocabulary:
-    """Rebuild a Vocabulary object from the saved word_to_index mapping."""
+    """Rebuild a Vocabulary object from the saved word_to_index mapping.
+
+    BUGFIX: this previously built an empty Vocabulary and returned it
+    without ever reading vocab_path, so every call to decode() fell
+    through to <unk> for every token. It now actually loads the JSON
+    saved by train.py and reconstructs both the word_to_index and
+    index_to_word mappings.
+    """
     with vocab_path.open("r", encoding="utf-8") as f:
-        data = json.load(f)
-    vocabulary = Vocabulary(min_frequency=data["min_frequency"])
-    vocabulary.word_to_index = {w: int(i) for w, i in data["word_to_index"].items()}
-    vocabulary.index_to_word = {i: w for w, i in vocabulary.word_to_index.items()}
+        saved = json.load(f)
+
+    vocabulary = Vocabulary(min_frequency=saved["min_frequency"])
+    vocabulary.word_to_index = saved["word_to_index"]
+    # JSON object keys are always strings, so index_to_word keys must
+    # be cast back to int to match how Vocabulary.decode() looks them up.
+    vocabulary.index_to_word = {
+        int(index): word for word, index in saved["word_to_index"].items()
+    }
     return vocabulary
 
 
@@ -48,7 +60,7 @@ def load_decoder(config: dict, weights_path: Path, device: torch.device) -> LSTM
         vocab_size=config["vocab_size"],
         num_layers=config["num_layers"],
     )
-    decoder.load_state_dict(torch.load(weights_path, map_location=device))
+    decoder.load_state_dict(torch.load(weights_path))
     decoder.to(device)
     decoder.eval()
     return decoder
@@ -113,14 +125,44 @@ def compute_bleu_scores(references: list, candidates: list) -> dict:
     """Corpus-level BLEU-1 through BLEU-4, with smoothing since short
     generated captions otherwise often score exactly 0 on higher-order
     n-grams (see Section 5 Step 6 guidance)."""
+
+    # Prevent BLEU from becoming 0 when some n-grams have no match
     smoothing = SmoothingFunction().method1
 
     scores = {}
-    for n in range(1, 5):
-        weights = tuple(1.0 / n for _ in range(n)) + tuple(0.0 for _ in range(4 - n))
-        scores[f"BLEU-{n}"] = corpus_bleu(
-            references, candidates, weights=weights, smoothing_function=smoothing
-        )
+
+    # BLEU-1
+    scores["BLEU-1"] = corpus_bleu(
+        references,
+        candidates,
+        weights=(1, 0, 0, 0),
+        smoothing_function=smoothing
+    )
+
+    # BLEU-2
+    scores["BLEU-2"] = corpus_bleu(
+        references,
+        candidates,
+        weights=(0.5, 0.5, 0, 0),
+        smoothing_function=smoothing
+    )
+
+    # BLEU-3
+    scores["BLEU-3"] = corpus_bleu(
+        references,
+        candidates,
+        weights=(1/3, 1/3, 1/3, 0),
+        smoothing_function=smoothing
+    )
+
+    # BLEU-4
+    scores["BLEU-4"] = corpus_bleu(
+        references,
+        candidates,
+        weights=(0.25, 0.25, 0.25, 0.25),
+        smoothing_function=smoothing
+    )
+
     return scores
 
 
